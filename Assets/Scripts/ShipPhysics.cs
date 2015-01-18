@@ -63,7 +63,7 @@ public class ShipPhysics : MonoBehaviour {
 			rightOutput = Mathf.Clamp(rightOutput - outputDrag * Time.deltaTime, 0, MAX_INDIVIDUAL_THRUST);
 
 		//Turning
-		rigidbody.AddRelativeTorque(0, ( leftOutput - rightOutput ) * 100, 0);
+		rigidbody.AddRelativeTorque(0, ( leftOutput - rightOutput ) * 200, 0);
 
 		//Movement
 		if (isThrusting) {
