@@ -57,6 +57,7 @@ public class ShipPhysics : MonoBehaviour {
 		if (Input.GetKey (KeyCode.RightArrow)) {
 			rigidbody.AddForceAtPosition(rightThruster.forward * speed, rightThruster.position , ForceMode.Acceleration);
 			rightOutput = Mathf.Clamp(rightOutput + outputRate * Time.deltaTime, 0, MAX_INDIVIDUAL_THRUST);
+			//rigidbody.AddTorque(0, -rightOutput * 100, 0);
 
 			isThrusting = true;
 		}
@@ -71,15 +72,22 @@ public class ShipPhysics : MonoBehaviour {
 		else 
 			rightOutput = Mathf.Clamp(rightOutput - outputDrag * Time.deltaTime, 0, MAX_INDIVIDUAL_THRUST);
 
+
+		rigidbody.AddRelativeTorque(0, ( leftOutput - rightOutput )*  100, 0);
+
 		//Movement
 		if (isThrusting) {
-			speed = Mathf.Clamp(speed + (leftOutput + rightOutput) * .5f * accelerationRate * Time.deltaTime, 0, max_speed);
-	
+			//speed = Mathf.Clamp(speed + (leftOutput + rightOutput) * .5f * accelerationRate * Time.deltaTime, 0, max_speed);
+			float acceleration = (leftOutput + rightOutput) * .5f * accelerationRate * Time.deltaTime;
+			rigidbody.velocity += transform.forward * (acceleration );
+
 		} else {
-			speed = Mathf.Clamp(speed - deccelerationRate * Time.deltaTime, 0, max_speed);
+			//speed = Mathf.Clamp(speed - deccelerationRate * Time.deltaTime, 0, max_speed);
+			//if(rigidbody.velocity.sqrMagnitude > 0)
+			//	rigidbody.velocity -= transform.forward * (deccelerationRate * Time.deltaTime );
+			//Debug.Log(rigidbody.velocity);
 		}
 
-		rigidbody.velocity = transform.forward * (speed + openingSpeedBoost);
 	}
 
 	IEnumerator CR_UpdateLoop()
@@ -115,4 +123,22 @@ public class ShipPhysics : MonoBehaviour {
 			yield return 0;
 		}
 	}
+
+	void OnCollisionEnter(Collision collision) {
+		int count = 0;
+		float x = 0; float y = 0; float z = 0;
+		foreach (ContactPoint contact in collision.contacts) {
+			count++;
+			x += contact.normal.x;
+			y += contact.normal.y;
+			z += contact.normal.z;
+
+						Debug.DrawRay (contact.point, contact.normal, Color.white);
+		}
+		x /= count;
+		y /= count;
+		z /= count;
+		Vector3 force = new Vector3 (x, 0, z) * collision.relativeVelocity.magnitude  * 5000000;
+	}
 }
+	
